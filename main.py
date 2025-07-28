@@ -25,7 +25,21 @@ class ToImgPlugin(Star):
                 return
 
             # 3. Create a prompt for the LLM to generate HTML
-            prompt = f"Please generate a self-contained HTML snippet which is easily viewable on mobile devices for the following text. It should be visually appealing and easy to read. Only return raw HTML code:\n\n{text}"
+            prompt = f"""Please generate a self-contained HTML snippet which is easily viewable on mobile devices for the following text. It should be visually appealing and easy to read. Only return raw HTML code.
+            Ensure that mathematical formulas are rendered correctly using MathJax. Include the MathJax CDN script and configure it to process LaTeX math.
+            Example MathJax configuration:
+            <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+            <script>
+            MathJax = {{
+              tex: {{
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
+              }},
+              svg: {{
+                fontCache: 'global'
+              }}
+            }};
+            </script>
+            \n\n{text}"""
 
             # 4. Call the LLM to get the HTML content
             response = await provider.text_chat(prompt=prompt, session_id=None, contexts=[])

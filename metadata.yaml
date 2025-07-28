@@ -1,5 +1,4 @@
-name: toimg # 这是你的插件的唯一识别名。
-desc: 这是 AstrBot 的默认插件，支持关键词回复。 # 插件简短描述
-version: v0.1 # 插件版本号。格式：v1.1.1 或者 v1.1
-author: liutai16 # 作者
-repo: https://github.com/JayLeo04/astrbot_plugin_toImg
+name: toimg
+author: JayLeo
+version: 0.1.0
+description: A plugin to render text to an image using an LLM and HTML.

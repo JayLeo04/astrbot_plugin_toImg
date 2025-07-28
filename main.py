@@ -1,20 +1,49 @@
-from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
+from astrbot.api.event import filter, AstrMessageEvent
 from astrbot.api.star import Context, Star, register
-from astrbot.api import logger # 使用 astrbot 提供的 logger 接口
+from astrbot.api import logger
 
-@register("helloworld", "author", "一个简单的 Hello World 插件", "1.0.0", "repo url")
-class MyPlugin(Star):
+@register("toimg", "JayLeo", "A plugin to render text to image.", "0.1.0")
+class ToImgPlugin(Star):
     def __init__(self, context: Context):
         super().__init__(context)
 
-    # 注册指令的装饰器。指令名为 helloworld。注册成功后，发送 `/helloworld` 就会触发这个指令，并回复 `你好, {user_name}!`
-    @filter.command("helloworld")
-    async def helloworld(self, event: AstrMessageEvent):
-        '''这是一个 hello world 指令''' # 这是 handler 的描述，将会被解析方便用户了解插件内容。非常建议填写。
-        user_name = event.get_sender_name()
-        message_str = event.message_str # 获取消息的纯文本内容
-        logger.info("触发hello world指令!")
-        yield event.plain_result(f"Hello, {user_name}!") # 发送一条纯文本消息
+    @filter.command("toimg")
+    async def toimg_command(self, event: AstrMessageEvent, text: str):
+        """
+        Renders text to an image using an LLM and HTML.
+        Args:
+            text(string): The text to render.
+        """
+        try:
+            # 1. Acknowledge the command and inform the user about the process
+            yield event.plain_result("Received! Generating HTML with LLM and rendering to image...")
+
+            # 2. Get the LLM provider
+            provider = self.context.get_using_provider()
+            if not provider:
+                yield event.plain_result("LLM provider not configured. Please configure a provider in the settings.")
+                return
+
+            # 3. Create a prompt for the LLM to generate HTML
+            prompt = f"Please generate a self-contained HTML snippet for the following text. Only return raw HTML code:\n\n{text}"
+
+            # 4. Call the LLM to get the HTML content
+            response = await provider.text_chat(prompt=prompt, session_id=None, contexts=[])
+            html_content = response.completion_text
+
+            if not html_content:
+                yield event.plain_result("LLM returned empty content. Cannot generate image.")
+                return
+
+            # 5. Render the HTML to an image
+            image_url = await self.html_render(html_content, {"text": text})
+
+            # 6. Send the image back to the user
+            yield event.image_result(image_url)
+
+        except Exception as e:
+            logger.error(f"Error in toimg plugin: {e}")
+            yield event.plain_result(f"An error occurred: {e}")
 
     async def terminate(self):
-        '''可选择实现 terminate 函数，当插件被卸载/停用时会调用。'''
+        pass

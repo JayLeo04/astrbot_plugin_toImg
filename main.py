@@ -25,7 +25,7 @@ class ToImgPlugin(Star):
                 return
 
             # 3. Create a prompt for the LLM to generate HTML
-            prompt = f"Please generate a self-contained HTML snippet for the following text. Only return raw HTML code:\n\n{text}"
+            prompt = f"Please generate a self-contained HTML snippet which is easily viewable on mobile devices for the following text. It should be visually appealing and easy to read. Only return raw HTML code:\n\n{text}"
 
             # 4. Call the LLM to get the HTML content
             response = await provider.text_chat(prompt=prompt, session_id=None, contexts=[])
